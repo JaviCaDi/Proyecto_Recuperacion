@@ -1,0 +1,25 @@
+<h2>Eventos</h2>
+
+<form (ngSubmit)="guardarEvento()">
+  <label>
+    Tiempo partido (HH:mm:ss):
+    <input type="time" step="1" [(ngModel)]="nuevoEvento.tiempo_partido" name="tiempo_partido" required>
+  </label>
+
+  <label>
+    ID Tipo Evento:
+    <input type="number" [(ngModel)]="nuevoEvento.tipoEvento.id_tipo_evento" name="id_tipo_evento" required>
+  </label>
+
+  <button type="submit">Crear Evento</button>
+</form>
+
+<hr>
+
+<h3>Lista de eventos</h3>
+<ul>
+  <li *ngFor="let evento of eventos">
+    {{ evento.tiempo_partido }} - TipoEvento ID: {{ evento.tipoEvento.id_tipo_evento }}
+    <button (click)="eliminarEvento(evento.id_evento!)">Eliminar</button>
+  </li>
+</ul>

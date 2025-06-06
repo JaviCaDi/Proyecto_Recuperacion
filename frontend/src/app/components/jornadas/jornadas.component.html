@@ -1,0 +1,80 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Jornadas</h2>
+
+  <div class="mb-3">
+    <button class="btn btn-primary me-2" (click)="crearJornadas()">Crear Jornadas</button>
+    <button class="btn btn-danger" (click)="limpiarJornadas()">Limpiar Jornadas</button>
+  </div>
+
+  <div *ngIf="loading" class="alert alert-info">Cargando jornadas...</div>
+
+  <table *ngIf="!loading && jornadas.length > 0" class="table table-striped table-hover">
+    <thead class="table-dark">
+      <tr>
+        <th>Nombre</th>
+        <th>Fecha Prevista</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let jornada of jornadas">
+        <td>{{ jornada.nombre }}</td>
+        <td>{{ jornada.fecha_referencia | date:'mediumDate' }}</td>
+        <td>
+          <button class="btn btn-sm btn-warning me-2" (click)="editarJornada(jornada)">Editar</button>
+          <button class="btn btn-sm btn-info text-white" (click)="inspeccionarJornada(jornada)">Inspeccionar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p *ngIf="!loading && jornadas.length === 0" class="text-muted">No hay jornadas disponibles.</p>
+</div>
+
+<!-- Modal -->
+<div class="modal fade show d-block" tabindex="-1" *ngIf="jornadaSeleccionada" style="background: rgba(0,0,0,0.5);">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content p-3">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <span *ngIf="modoModal === 'editar'">Editar Jornada</span>
+          <span *ngIf="modoModal === 'inspeccionar'">Detalle de Jornada</span>
+        </h5>
+        <button type="button" class="btn-close" (click)="cerrarModal()"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Nombre:</label>
+          <input *ngIf="modoModal === 'editar'" type="text" class="form-control" [(ngModel)]="jornadaSeleccionada.nombre" />
+          <p *ngIf="modoModal === 'inspeccionar'" class="form-control-plaintext">{{ jornadaSeleccionada.nombre }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Fecha Referencia:</label>
+          <input *ngIf="modoModal === 'editar'" type="date" class="form-control" [(ngModel)]="jornadaSeleccionada.fecha_referencia" />
+          <p *ngIf="modoModal === 'inspeccionar'" class="form-control-plaintext">{{ jornadaSeleccionada.fecha_referencia | date:'mediumDate' }}</p>
+        </div>
+
+        <!-- Partidos (solo inspección) -->
+        <div *ngIf="modoModal === 'inspeccionar'">
+          <h6>Partidos</h6>
+          <ul *ngIf="jornadaSeleccionada.partidos?.length > 0; else sinPartidos" class="list-group">
+            <li *ngFor="let partido of jornadaSeleccionada.partidos" class="list-group-item">
+              {{ partido.local?.nombre }} vs {{ partido.visitante?.nombre }} - {{ partido.fecha_prevista | date: 'short' }}
+              <span *ngIf="partido.arbitro" class="badge bg-secondary ms-2">Árbitro: {{ partido.arbitro.nombre }}</span>
+            </li>
+          </ul>
+          <ng-template #sinPartidos>
+            <p class="text-muted">No hay partidos registrados para esta jornada.</p>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cerrar</button>
+        <button *ngIf="modoModal === 'editar'" type="button" class="btn btn-primary" (click)="guardarCambios()">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>

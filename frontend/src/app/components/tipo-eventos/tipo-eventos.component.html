@@ -1,0 +1,72 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Tipos de Evento</h2>
+
+  <!-- Formulario de creación -->
+  <form (ngSubmit)="guardar()" class="row g-3 mb-4">
+    <div class="col-md-6">
+      <input type="text" class="form-control" [(ngModel)]="nuevoTipoEvento.nombre" name="nombre" placeholder="Nombre del tipo de evento" required>
+    </div>
+    <div class="col-12">
+      <button type="submit" class="btn btn-success">Crear</button>
+    </div>
+  </form>
+
+  <!-- Tabla de tipos de evento -->
+  <table class="table table-bordered table-striped">
+    <thead class="table-dark">
+      <tr>
+        <th>Nombre</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let tipo of tiposEvento">
+        <td>{{ tipo.nombre }}</td>
+        <td>
+          <button class="btn btn-primary btn-sm me-2" (click)="abrirModalEditar(tipo)">Editar</button>
+          <button class="btn btn-danger btn-sm" (click)="abrirModalEliminar(tipo)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form (ngSubmit)="guardar()">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editarModalLabel">Editar Tipo de Evento</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control" [(ngModel)]="tipoEventoEditando.nombre" name="nombreEditar" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar cambios</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="cancelarEdicion()" #btnCancelarModal>Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmarEliminarModalLabel">¿Estás seguro?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Quieres eliminar este tipo de evento?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" (click)="confirmarEliminar()" data-bs-dismiss="modal">Eliminar</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>

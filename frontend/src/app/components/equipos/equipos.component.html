@@ -1,0 +1,126 @@
+<div class="container mt-4">
+  <h2 class="mb-4">Gestión de Equipos</h2>
+
+  <!-- Formulario de creación -->
+  <form (ngSubmit)="guardar()" class="row g-3 mb-4">
+    <div class="col-md-4">
+      <input type="text" class="form-control" [(ngModel)]="nuevoEquipo.nombre" name="nombre" placeholder="Nombre"
+        required>
+    </div>
+    <div class="col-md-4">
+      <input type="text" class="form-control" [(ngModel)]="nuevoEquipo.ciudad" name="ciudad" placeholder="Ciudad"
+        required>
+    </div>
+    <div class="col-md-4">
+      <input type="number" class="form-control" [(ngModel)]="nuevoEquipo.anio_fundacion" name="anio_fundacion"
+        placeholder="Año de Fundación" required>
+    </div>
+
+    <div class="col-12">
+      <button type="submit" class="btn btn-success">Crear</button>
+    </div>
+  </form>
+
+  <!-- Tabla con scroll vertical -->
+  <div class="scroll-vertical">
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Nombre</th>
+          <th>Ciudad</th>
+          <th>Año Fundación</th>
+          <th>Escudo</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let equipo of equipos">
+          <td>{{ equipo.nombre }}</td>
+          <td>{{ equipo.ciudad }}</td>
+          <td>{{ equipo.anioFundacion }}</td>
+          <td>
+            <img *ngIf="equipo.escudo" [src]="'http://localhost:8080/img/equipos/' + equipo.escudo" alt="Escudo"
+              width="50">
+          </td>
+          <td>
+            <button class="btn btn-info btn-sm me-2" (click)="abrirModalInspeccionar(equipo)">Inspeccionar</button>
+            <button class="btn btn-primary btn-sm me-2" (click)="abrirModalEditar(equipo)">Editar</button>
+            <button class="btn btn-danger btn-sm" (click)="abrirModalEliminar(equipo)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="editarModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form (ngSubmit)="guardar()">
+        <div class="modal-header">
+          <h5 class="modal-title">Editar Equipo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" class="form-control mb-2" [(ngModel)]="equipoEditando.nombre" name="nombreEditar" required>
+          <input type="text" class="form-control mb-2" [(ngModel)]="equipoEditando.ciudad" name="ciudadEditar" required>
+          <input type="number" class="form-control mb-2" [(ngModel)]="equipoEditando.anio_fundacion" name="anioEditar"
+            required>
+          <input type="text" class="form-control mb-2" [(ngModel)]="equipoEditando.escudo" name="escudoEditar" required>
+          <input type="text" class="form-control mb-2" [(ngModel)]="equipoEditando.foto_oficial" name="fotoEditar"
+            required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Guardar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="cancelarEdicion()"
+            #btnCancelarModal>Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="confirmarEliminarModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">¿Estás seguro?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>¿Quieres eliminar este equipo?</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" (click)="confirmarEliminar()" data-bs-dismiss="modal">Eliminar</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL INSPECCIONAR -->
+<div class="modal fade" id="inspeccionarModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-between align-items-start">
+        <h5 class="modal-title">{{ equipoInspeccion?.nombre }}</h5>
+        <img *ngIf="equipoInspeccion?.escudo" [src]="'http://localhost:8080/img/equipos/' + equipoInspeccion.escudo"
+          alt="Escudo" width="60" height="60" style="object-fit: contain;">
+      </div>
+      <div class="modal-body text-center">
+        <img *ngIf="equipoInspeccion?.fotoOficial"
+          [src]="'http://localhost:8080/img/equipos/' + equipoInspeccion.fotoOficial" alt="Foto Oficial"
+          class="img-fluid mb-3" style="max-height: 300px;">
+        <h5>Jugadores</h5>
+        <ul class="list-group">
+          <li *ngFor="let jugador of jugadoresPorEquipo" class="list-group-item">{{ jugador.nombre }}</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>

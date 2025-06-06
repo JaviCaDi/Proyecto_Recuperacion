@@ -1,0 +1,105 @@
+<div class="container mt-4">
+    <h2 class="mb-4">Gestión de Jugadores</h2>
+
+    <!-- Formulario de creación -->
+    <form (ngSubmit)="guardar()" class="row g-3 mb-4" enctype="multipart/form-data">
+        <div class="col-md-3">
+            <input type="text" class="form-control" [(ngModel)]="nuevoJugador.nombre" name="nombre" placeholder="Nombre" required>
+        </div>
+        <div class="col-md-3">
+            <input type="date" class="form-control" [(ngModel)]="nuevoJugador.fecha_nac" name="fecha_nac" required>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" [(ngModel)]="nuevoJugador.id_equipo" name="id_equipo" required>
+                <option value="" disabled selected>Selecciona un equipo</option>
+                <option *ngFor="let equipo of equipos" [value]="equipo.id_equipo">{{ equipo.nombre }}</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*" required>
+        </div>
+
+        <div class="col-12">
+            <button type="submit" class="btn btn-success">Crear</button>
+        </div>
+    </form>
+
+    <!-- Tabla de jugadores -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Fecha de nacimiento</th>
+                <th>Equipo</th>
+                <th>Foto</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let jugador of jugadores">
+                <td>{{ jugador.nombre }}</td>
+                <td>{{ jugador.fecha_nac | date: 'yyyy-MM-dd' }}</td>
+                <td>{{ jugador.equipo?.nombre }}</td>
+                <td>
+                    <img *ngIf="jugador.foto" [src]="'http://localhost:8080/img/jugadores/' + jugador.foto" alt="Foto"
+                        style="width: 60px; height: 60px; object-fit: cover; border-radius: 5px;">
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm me-2" (click)="abrirModalEditar(jugador)">Editar</button>
+                    <button class="btn btn-danger btn-sm" (click)="abrirModalEliminar(jugador)">Eliminar</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- MODAL EDITAR -->
+<div class="modal fade" id="editarModal" tabindex="-1" aria-labelledby="editarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form (ngSubmit)="guardar()">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editarModalLabel">Editar Jugador</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control mb-2" [(ngModel)]="jugadorEditando.nombre" name="nombreEditar" required>
+                    <input type="date" class="form-control mb-2" [(ngModel)]="jugadorEditando.fecha_nac" name="fecha_nacEditar" required>
+                    <select class="form-select mb-2" [(ngModel)]="jugadorEditando.id_equipo" name="id_equipoEditar" required>
+                        <option *ngFor="let equipo of equipos" [value]="equipo.id_equipo">{{ equipo.nombre }}</option>
+                    </select>
+                    <input type="file" class="form-control" (change)="onFileSelectedEditar($event)" accept="image/*">
+                    <div class="mt-2">
+                        <img *ngIf="jugadorEditando.foto" [src]="'http://localhost:8080/img/jugadores/' + jugadorEditando.foto" alt="Foto actual"
+                            style="width: 80px; height: 80px; object-fit: cover; border-radius: 5px;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" (click)="cancelarEdicion()" #btnCancelarModal>Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR -->
+<div class="modal fade" id="confirmarEliminarModal" tabindex="-1" aria-labelledby="confirmarEliminarModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmarEliminarModalLabel">¿Estás seguro?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Quieres eliminar este jugador?</p>
+            </div>
+            <div class="modal-footer">
+               
+
+                <button class="btn btn-danger" (click)="confirmarEliminar()" data-bs-dismiss="modal">Eliminar</button>
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
