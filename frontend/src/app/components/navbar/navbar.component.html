@@ -7,6 +7,7 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <!-- Tus enlaces actuales -->
         <li class="nav-item">
           <a class="nav-link" routerLink="/jornadas" routerLinkActive="active">Jornadas</a>
         </li>
@@ -28,6 +29,33 @@
         <li class="nav-item">
           <a class="nav-link" routerLink="/eventos" routerLinkActive="active">Eventos</a>
         </li>
+      </ul>
+
+      <ul class="navbar-nav ms-auto">
+        <!-- Si NO está logeado -->
+        <ng-container *ngIf="!isLoggedIn()">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/login" routerLinkActive="active">Login</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/register" routerLinkActive="active">Register</a>
+          </li>
+        </ng-container>
+
+        <!-- Si está logeado -->
+        <ng-container *ngIf="isLoggedIn()">
+          <li class="nav-item dropdown">
+            <button class="nav-link dropdown-toggle btn btn-link" type="button" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              {{ username }}
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" (click)="logout()">Cerrar sesión</a></li>
+              <li><a class="dropdown-item" (click)="eliminarCuenta()">Eliminar cuenta</a></li>
+            </ul>
+          </li>
+        </ng-container>
       </ul>
     </div>
   </div>

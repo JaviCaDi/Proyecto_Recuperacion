@@ -1,6 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { jwtDecode } from 'jwt-decode';
+
 
 @Injectable({
   providedIn: 'root',
@@ -36,4 +38,22 @@ export class AuthService {
   isLoggedIn(): boolean {
     return !!this.getToken();
   }
+
+  getUsername(): string | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const decoded: any = jwtDecode(token);
+      return decoded.sub || decoded.nombre || null; // dependiendo de cómo guardes el nombre en el token
+    } catch {
+      return null;
+    }
+  }
+
+  eliminarCuenta() {
+    return this.http.delete(`http://localhost:8080/api/usuario/me`);
+  }
+
+
 }

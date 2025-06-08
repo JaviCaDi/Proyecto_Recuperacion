@@ -31,4 +31,11 @@ public class UsuarioServiceImpl implements UsuarioService {
     public Usuario guardar(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }
+
+    @Override
+    public void eliminarPorNombre(String nombre) {
+        Optional<Usuario> usuarioOpt = usuarioRepository.findByNombre(nombre);
+        usuarioOpt.ifPresent(usuarioRepository::delete);
+    }
+
 }

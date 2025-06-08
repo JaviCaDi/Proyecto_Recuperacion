@@ -9,4 +9,5 @@ public interface UsuarioService {
     Optional<Usuario> obtenerPorNombre(String nombre);
     List<Usuario> listarTodos();
     Usuario guardar(Usuario usuario);
+    void eliminarPorNombre(String nombre);
 }

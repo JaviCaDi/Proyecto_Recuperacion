@@ -16,17 +16,19 @@ export class LoginComponent {
   contrasena: string = '';
   error: string = '';
 
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(private authService: AuthService, private router: Router) { }
 
   login() {
     this.authService.login(this.nombre, this.contrasena).subscribe({
       next: (res: any) => {
         this.authService.saveToken(res.token);
+        localStorage.setItem('username', this.nombre); // guarda el nombre del usuario
         this.router.navigate(['/']);
       },
       error: () => {
-        this.error = 'Credenciales incorrectas.';
+        this.error = 'Usuario o contraseña incorrectos';
       }
     });
+
   }
 }
