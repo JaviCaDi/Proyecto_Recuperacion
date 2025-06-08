@@ -27,6 +27,10 @@ public class Usuario implements UserDetails {
 
     // Getters y setters omitidos por brevedad
 
+    public Long getId() {
+        return id;
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + rol.name()));
@@ -78,9 +82,10 @@ public class Usuario implements UserDetails {
         this.arbitro = arbitro;
     }
 
-    public Arbitro getArbitro(){
+    public Arbitro getArbitro() {
         return arbitro;
     }
+
     public Rol getRol() {
         return rol;
     }

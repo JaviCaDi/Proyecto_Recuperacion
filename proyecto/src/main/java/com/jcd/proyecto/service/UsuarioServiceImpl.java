@@ -1,8 +1,10 @@
 package com.jcd.proyecto.service;
 
+import com.jcd.proyecto.model.Arbitro;
+import com.jcd.proyecto.model.Rol;
 import com.jcd.proyecto.model.Usuario;
+import com.jcd.proyecto.repository.ArbitroRepository;
 import com.jcd.proyecto.repository.UsuarioRepository;
-import com.jcd.proyecto.service.UsuarioService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,9 +14,33 @@ import java.util.Optional;
 public class UsuarioServiceImpl implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final ArbitroRepository arbitroRepository;
 
-    public UsuarioServiceImpl(UsuarioRepository usuarioRepository) {
+    public UsuarioServiceImpl(UsuarioRepository usuarioRepository, ArbitroRepository arbitroRepository) {
         this.usuarioRepository = usuarioRepository;
+        this.arbitroRepository = arbitroRepository;
+    }
+
+    @Override
+    public List<Usuario> listarUsuariosPorRol(Rol rol) {
+        return usuarioRepository.findByRol(rol);
+    }
+
+    @Override
+    public List<Arbitro> listarArbitros() {
+        return arbitroRepository.findAll();
+    }
+
+    @Override
+    public void asignarArbitroAUsuario(Long usuarioId, Integer arbitroId) {
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Arbitro arbitro = arbitroRepository.findById(arbitroId)
+                .orElseThrow(() -> new RuntimeException("Arbitro no encontrado"));
+
+        usuario.setRol(Rol.ARBITRO);
+        usuario.setArbitro(arbitro);
+        usuarioRepository.save(usuario);
     }
 
     @Override

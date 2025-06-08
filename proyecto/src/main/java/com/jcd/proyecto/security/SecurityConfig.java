@@ -24,20 +24,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors().and() // ⬅️ Importante: habilitar CORS
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMIN")
-                .requestMatchers("/arbitro/**").hasRole("ARBITRO")
-                .requestMatchers("/api/equipos/**").permitAll()
-                .requestMatchers("/api/partidos/**").permitAll()
-                .requestMatchers("/api/arbitros/**").permitAll()
-                .requestMatchers("/api/usuario/me").authenticated()
-                .requestMatchers("/img/**").permitAll()
-                .anyRequest().authenticated()
-            );
+                .cors().and() // ⬅️ Importante: habilitar CORS
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/arbitro/**").hasRole("ARBITRO")
+                        .requestMatchers("/api/equipos/**").permitAll()
+                        .requestMatchers("/api/partidos/**").permitAll()
+                        .requestMatchers("/api/arbitros/**").permitAll()
+                        .requestMatchers("/api/admin/arbitros/**").permitAll()
+                        .requestMatchers("/api/admin/usuarios/**").permitAll()
+                        .requestMatchers("/api/usuario/me").authenticated()
+                        .requestMatchers("/img/**").permitAll()
+                        .anyRequest().authenticated());
 
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 

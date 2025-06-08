@@ -45,7 +45,7 @@ export class AuthService {
 
     try {
       const decoded: any = jwtDecode(token);
-      return decoded.sub || decoded.nombre || null; // dependiendo de cómo guardes el nombre en el token
+      return decoded.sub || decoded.nombre || null;
     } catch {
       return null;
     }
