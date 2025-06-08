@@ -32,6 +32,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('jwt');
+    localStorage.removeItem('username');
     this.router.navigate(['/login']);
   }
 
