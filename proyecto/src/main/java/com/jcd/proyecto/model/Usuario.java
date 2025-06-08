@@ -21,7 +21,7 @@ public class Usuario implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Rol rol;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "id_arbitro")
     private Arbitro arbitro;
 
@@ -61,4 +61,28 @@ public class Usuario implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setContrasena(String contrasena) {
+        this.contrasena = contrasena;
+    }
+
+    public void setRol(Rol rol) {
+        this.rol = rol;
+    }
+
+    public void setArbitro(Arbitro arbitro) {
+        this.arbitro = arbitro;
+    }
+
+    public Arbitro getArbitro(){
+        return arbitro;
+    }
+    public Rol getRol() {
+        return rol;
+    }
+
 }

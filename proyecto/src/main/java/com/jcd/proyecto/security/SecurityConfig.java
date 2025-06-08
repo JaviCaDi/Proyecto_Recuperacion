@@ -29,9 +29,11 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/admin/**").hasRole("ADMINISTRADOR")
-                .requestMatchers("/arbitro/**").hasRole("ÁRBITRO")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/arbitro/**").hasRole("ARBITRO")
                 .requestMatchers("/api/equipos/**").permitAll()
+                .requestMatchers("/api/partidos/**").permitAll()
+                .requestMatchers("/api/arbitros/**").permitAll()
                 .requestMatchers("/img/**").permitAll()
                 .anyRequest().authenticated()
             );
