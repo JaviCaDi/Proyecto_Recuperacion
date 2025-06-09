@@ -1,25 +1,29 @@
-<h2>Eventos</h2>
+<div class="container mt-4">
+  <h2 class="mb-3">Mis partidos como árbitro</h2>
 
-<form (ngSubmit)="guardarEvento()">
-  <label>
-    Tiempo partido (HH:mm:ss):
-    <input type="time" step="1" [(ngModel)]="nuevoEvento.tiempo_partido" name="tiempo_partido" required>
-  </label>
+  <table class="table table-striped" *ngIf="partidos.length > 0; else sinPartidos">
+    <thead>
+      <tr>
+        <th>Local</th>
+        <th>Visitante</th>
+        <th>Fecha prevista</th>
+        <th>Ciudad</th>
+        <th>Federación árbitro</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let partido of partidos">
+        <td>{{ partido.local.nombre }}</td>
+        <td>{{ partido.visitante.nombre }}</td>
+        <td>{{ partido.fecha_prevista | date: 'medium' }}</td>
+        <td>{{ partido.local.ciudad }} vs {{ partido.visitante.ciudad }}</td>
+        <td>{{ partido.arbitro.federacion }}</td>
+        <button (click)="arbitrarPartido(partido.id_partido)">Arbitrar</button>
+      </tr>
+    </tbody>
+  </table>
 
-  <label>
-    ID Tipo Evento:
-    <input type="number" [(ngModel)]="nuevoEvento.tipoEvento.id_tipo_evento" name="id_tipo_evento" required>
-  </label>
-
-  <button type="submit">Crear Evento</button>
-</form>
-
-<hr>
-
-<h3>Lista de eventos</h3>
-<ul>
-  <li *ngFor="let evento of eventos">
-    {{ evento.tiempo_partido }} - TipoEvento ID: {{ evento.tipoEvento.id_tipo_evento }}
-    <button (click)="eliminarEvento(evento.id_evento!)">Eliminar</button>
-  </li>
-</ul>
+  <ng-template #sinPartidos>
+    <p class="text-muted">No tienes partidos asignados actualmente.</p>
+  </ng-template>
+</div>

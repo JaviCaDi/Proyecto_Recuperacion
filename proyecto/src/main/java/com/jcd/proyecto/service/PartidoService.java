@@ -11,4 +11,6 @@ public interface PartidoService {
     Partido guardar(Partido partido);
     void eliminar(Integer id);
     List<Partido> listarPorJornada(Integer idJornada);
+    List<Partido> listarPorArbitro(Long idArbitro);
+
 }

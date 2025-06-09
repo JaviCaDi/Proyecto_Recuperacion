@@ -38,4 +38,10 @@ public class PartidoServiceImpl implements PartidoService {
     public List<Partido> listarPorJornada(Integer idJornada) {
         return partidoRepository.findByJornada_IdJornada(idJornada);
     }
+
+    @Override
+    public List<Partido> listarPorArbitro(Long idArbitro) {
+        return partidoRepository.findByArbitroIdArbitro(idArbitro);
+    }
+
 }

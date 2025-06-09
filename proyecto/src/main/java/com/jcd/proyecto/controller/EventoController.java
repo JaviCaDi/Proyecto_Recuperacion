@@ -1,9 +1,11 @@
 package com.jcd.proyecto.controller;
 
-import com.jcd.proyecto.model.Evento;
-import com.jcd.proyecto.service.EventoService;
+import com.jcd.proyecto.model.Partido;
+import com.jcd.proyecto.model.Usuario;
+import com.jcd.proyecto.service.PartidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,28 +16,31 @@ import java.util.List;
 public class EventoController {
 
     @Autowired
-    private EventoService eventoService;
+    private PartidoService partidoService;
 
-    @GetMapping
-    public List<Evento> listarTodos() {
-        return eventoService.listarTodos();
+    // Endpoint para listar partidos que arbitra el usuario logueado
+    @GetMapping("/mis-partidos")
+    public ResponseEntity<List<Partido>> listarPartidosPorArbitro(Authentication authentication) {
+        Long idArbitro = obtenerIdArbitroDesdeAuthentication(authentication);
+        if (idArbitro == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        List<Partido> partidos = partidoService.listarPorArbitro(idArbitro);
+        return ResponseEntity.ok(partidos);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Evento> buscarPorId(@PathVariable Integer id) {
-        return eventoService.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
+    private Long obtenerIdArbitroDesdeAuthentication(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof Usuario)) {
+            return null;
+        }
 
-    @PostMapping
-    public Evento guardar(@RequestBody Evento evento) {
-        return eventoService.guardar(evento);
-    }
+        Usuario usuario = (Usuario) authentication.getPrincipal();
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
-        eventoService.eliminar(id);
-        return ResponseEntity.noContent().build();
+        if (usuario.getArbitro() == null) {
+            return null;
+        }
+
+        return usuario.getArbitro().getIdArbitro().longValue(); // convertimos Integer a Long
     }
 }

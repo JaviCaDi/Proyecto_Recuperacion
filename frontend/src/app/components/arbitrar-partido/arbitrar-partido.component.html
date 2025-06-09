@@ -1,0 +1,44 @@
+<div *ngIf="partido; else cargando" class="container mt-4">
+  <div class="card">
+    <div class="card-body">
+      <h2 class="card-title text-center">{{ partido.local.nombre }} <span class="text-muted">vs</span> {{ partido.visitante.nombre }}</h2>
+      <p class="text-center text-secondary">Fecha: {{ partido.fecha_prevista | date:'medium' }}</p>
+
+      <div class="d-flex justify-content-center align-items-center my-3 gap-3">
+        <h3>Parte actual: {{ parteActual > 0 ? parteActual : 'No iniciado' }}</h3>
+        <h3 class="ms-4">Tiempo: {{ tiempoFormateado }}</h3>
+      </div>
+
+      <div class="d-flex justify-content-center gap-2 mb-3">
+        <button class="btn btn-success" (click)="iniciarPartido()" [disabled]="parteActual > 0">Iniciar</button>
+        <button class="btn btn-danger" (click)="detenerPartido()" [disabled]="parteActual === 0">Detener</button>
+      </div>
+
+      <div class="d-flex justify-content-center gap-2 mb-4">
+        <span class="me-2">Velocidad:</span>
+        <button class="btn btn-outline-primary" [class.active]="velocidad === 1" (click)="cambiarVelocidad(1)">x1</button>
+        <button class="btn btn-outline-primary" [class.active]="velocidad === 20" (click)="cambiarVelocidad(20)">x20</button>
+        <button class="btn btn-outline-primary" [class.active]="velocidad === 40" (click)="cambiarVelocidad(40)">x40</button>
+        <button class="btn btn-outline-primary" [class.active]="velocidad === 80" (click)="cambiarVelocidad(80)">x80</button>
+        <button class="btn btn-outline-primary" [class.active]="velocidad === 200" (click)="cambiarVelocidad(200)">x200</button>
+      </div>
+
+      <!-- Panel tipos de evento -->
+      <div class="mt-4">
+        <h4 class="text-center mb-3">Tipos de evento disponibles</h4>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+          <button *ngFor="let tipo of tipoEventos" 
+                  class="btn btn-outline-primary tipo-evento-btn" 
+                  type="button" 
+                  title="{{ tipo.nombre }}">
+            {{ tipo.nombre }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #cargando>
+  <p class="text-center mt-3">Cargando partido...</p>
+</ng-template>

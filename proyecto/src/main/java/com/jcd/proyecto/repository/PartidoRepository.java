@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface PartidoRepository extends JpaRepository<Partido, Integer> {
     List<Partido> findByJornada_IdJornada(Integer idJornada);
+    List<Partido> findByArbitroIdArbitro(Long idArbitro);
 }
