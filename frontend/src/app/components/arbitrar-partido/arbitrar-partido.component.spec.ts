@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ArbitrarPartidoComponent } from './arbitrar-partido.component';
+import { ArbitrarComponent } from './arbitrar-partido.component';
 
-describe('ArbitrarPartidoComponent', () => {
-  let component: ArbitrarPartidoComponent;
-  let fixture: ComponentFixture<ArbitrarPartidoComponent>;
+describe('ArbitrarComponent', () => {
+  let component: ArbitrarComponent;
+  let fixture: ComponentFixture<ArbitrarComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ArbitrarPartidoComponent]
+      imports: [ArbitrarComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ArbitrarPartidoComponent);
+    fixture = TestBed.createComponent(ArbitrarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

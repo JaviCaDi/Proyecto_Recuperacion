@@ -9,6 +9,7 @@ export interface Equipo {
   ciudad: string;
   escudo: string;
   fotoOficial: string;
+  jugadores: Jugador[]; 
 }
 
 export interface Arbitro {
@@ -27,31 +28,55 @@ export interface Partido {
   fecha_inicio: string | null;
 }
 
-// Aquí defines la interfaz TipoEvento que faltaba
 export interface TipoEvento {
   id_tipo_evento: number;
   nombre: string;
+}
+
+export interface Jugador {
+  id_jugador: number;
+  nombre: string;
+  dorsal: number;
+  posicion: string;
+  equipo: Equipo;
+}
+
+export interface Evento {
+  tiempo_partido: string; // Formato HH:mm:ss
+  id_tipo_evento: number;
+  id_jugador: number;
+  id_partido: number;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class EventosService {
-  private apiUrl = 'http://localhost:8080/api/eventos/mis-partidos';
-  private tipoEventosUrl = 'http://localhost:8080/api/tipoeventos';
+  private baseUrl = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   getMisPartidos(): Observable<Partido[]> {
-    return this.http.get<Partido[]>(this.apiUrl);
+    return this.http.get<Partido[]>(`${this.baseUrl}/eventos/mis-partidos`);
   }
 
   getPartidoById(id: number): Observable<Partido> {
-    const url = `http://localhost:8080/api/arbitraje/partido/${id}`;
-    return this.http.get<Partido>(url);
+    return this.http.get<Partido>(`${this.baseUrl}/arbitraje/partido/${id}`);
   }
 
   getTipoEventos(): Observable<TipoEvento[]> {
-    return this.http.get<TipoEvento[]>(this.tipoEventosUrl);
+    return this.http.get<TipoEvento[]>(`${this.baseUrl}/tipoeventos`);
+  }
+
+  getJugadoresByEquipo(idEquipo: number): Observable<Jugador[]> {
+    return this.http.get<Jugador[]>(`${this.baseUrl}/jugadores/equipo/${idEquipo}`);
+  }
+
+  registrarEventos(eventos: Evento[]): Observable<any> {
+    return this.http.post(`${this.baseUrl}/eventos`, eventos);
+  }
+
+  getEventosPorPartido(idPartido: number): Observable<Evento[]> {
+    return this.http.get<Evento[]>(`${this.baseUrl}/eventos/partido/${idPartido}`);
   }
 }

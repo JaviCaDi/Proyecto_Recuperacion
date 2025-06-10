@@ -33,4 +33,9 @@ public class JugadorServiceImpl implements JugadorService {
     public void eliminar(Integer id) {
         jugadorRepository.deleteById(id);
     }
+
+    @Override
+    public List<Jugador> obtenerPorEquipo(Integer idEquipo) {
+        return jugadorRepository.findByEquipo_IdEquipo(idEquipo);
+    }
 }

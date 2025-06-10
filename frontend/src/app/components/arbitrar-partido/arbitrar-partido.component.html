@@ -23,18 +23,50 @@
         <button class="btn btn-outline-primary" [class.active]="velocidad === 200" (click)="cambiarVelocidad(200)">x200</button>
       </div>
 
-      <!-- Panel tipos de evento -->
+      <!-- NUEVO BLOQUE DE BOTONES -->
       <div class="mt-4">
-        <h4 class="text-center mb-3">Tipos de evento disponibles</h4>
+        <h4 class="text-center mb-3">Eventos especiales</h4>
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+          <button *ngFor="let tipo of tipoEventosEspeciales" class="btn btn-warning tipo-evento-btn"
+                  type="button" title="{{ tipo.nombre }}" (click)="onTipoEventoClick(tipo.nombre)">
+            {{ tipo.nombre }}
+          </button>
+        </div>
+
+        <h4 class="text-center mb-3">Eventos normales</h4>
         <div class="d-flex flex-wrap justify-content-center gap-3">
-          <button *ngFor="let tipo of tipoEventos" 
-                  class="btn btn-outline-primary tipo-evento-btn" 
-                  type="button" 
-                  title="{{ tipo.nombre }}">
+          <button *ngFor="let tipo of tipoEventosNormales" class="btn btn-outline-primary tipo-evento-btn"
+                  type="button" title="{{ tipo.nombre }}" (click)="onTipoEventoClick(tipo.nombre)">
             {{ tipo.nombre }}
           </button>
         </div>
       </div>
+      <!-- FIN NUEVO BLOQUE -->
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal personalizado para once inicial -->
+<div class="modal-custom" *ngIf="mostrarModalOnceInicial">
+  <div class="modal-content-custom">
+    <h2>Seleccionar Once Inicial</h2>
+    <p>Seleccione exactamente 11 jugadores ({{ jugadoresSeleccionadosIds.size }}/11):</p>
+    <div class="jugadores-lista">
+      <div *ngFor="let jugador of jugadoresOnceInicial" class="jugador-checkbox">
+        <input type="checkbox"
+               [id]="'jugador-' + jugador.id_jugador"
+               [checked]="jugadoresSeleccionadosIds.has(jugador.id_jugador)"
+               (change)="toggleJugadorSeleccionado(jugador)"
+               [disabled]="!jugadoresSeleccionadosIds.has(jugador.id_jugador) && jugadoresSeleccionadosIds.size >= 11">
+        <label [for]="'jugador-' + jugador.id_jugador">
+          {{ jugador.nombre }} ({{ jugador.dorsal }})
+        </label>
+      </div>
+    </div>
+    <div class="modal-buttons">
+      <button (click)="confirmarOnceInicial()" [disabled]="jugadoresSeleccionadosIds.size !== 11">Confirmar</button>
+      <button (click)="ocultarModalOnceInicial()">Cancelar</button>
     </div>
   </div>
 </div>

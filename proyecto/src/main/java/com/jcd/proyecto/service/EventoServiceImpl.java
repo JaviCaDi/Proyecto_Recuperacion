@@ -33,4 +33,14 @@ public class EventoServiceImpl implements EventoService {
     public void eliminar(Integer id) {
         eventoRepository.deleteById(id);
     }
+
+    @Override
+    public List<Evento> guardarTodos(List<Evento> eventos) {
+        return eventoRepository.saveAll(eventos);
+    }
+
+    @Override
+    public List<Evento> obtenerPorPartido(Integer idPartido) {
+        return eventoRepository.findByPartido_IdPartido(idPartido);
+    }
 }

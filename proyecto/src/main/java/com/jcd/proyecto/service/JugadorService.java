@@ -10,4 +10,5 @@ public interface JugadorService {
     Optional<Jugador> buscarPorId(Integer id);
     Jugador guardar(Jugador jugador);
     void eliminar(Integer id);
+    List<Jugador> obtenerPorEquipo(Integer idEquipo);
 }

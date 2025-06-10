@@ -1,16 +1,52 @@
-.tipo-evento-btn {
-  width: 120px;
-  height: 120px;
-  font-weight: 600;
-  font-size: 1rem;
+/* Estilos básicos para el modal sin Bootstrap */
+.modal-custom {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
-  transition: background-color 0.3s, color 0.3s;
+  z-index: 1050;
 }
 
-.tipo-evento-btn:hover {
-  background-color: #0d6efd; /* bootstrap primary */
-  color: white;
+.modal-content-custom {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header-custom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.btn-cerrar {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-body-custom {
+  margin-bottom: 1rem;
+}
+
+.form-check {
+  margin-bottom: 0.5rem;
+}
+
+.modal-footer-custom {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
 }

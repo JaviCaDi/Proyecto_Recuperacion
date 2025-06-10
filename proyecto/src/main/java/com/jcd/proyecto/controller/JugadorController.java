@@ -24,7 +24,7 @@ public class JugadorController {
     private JugadorService jugadorService;
 
     @Autowired
-    private EquipoService equipoService;  // Inyectamos EquipoService para obtener el equipo válido
+    private EquipoService equipoService; // Inyectamos EquipoService para obtener el equipo válido
 
     @GetMapping
     public List<Jugador> listarTodos() {
@@ -43,7 +43,8 @@ public class JugadorController {
             @RequestPart("jugador") Jugador jugador,
             @RequestPart("foto") MultipartFile foto) {
 
-        // Recuperamos el equipo completo desde BD usando el idEquipo que viene en jugador.getEquipo().getIdEquipo()
+        // Recuperamos el equipo completo desde BD usando el idEquipo que viene en
+        // jugador.getEquipo().getIdEquipo()
         if (jugador.getEquipo() != null && jugador.getEquipo().getIdEquipo() != null) {
             Equipo equipo = equipoService.buscarPorId(jugador.getEquipo().getIdEquipo()).orElse(null);
             jugador.setEquipo(equipo);
@@ -80,7 +81,8 @@ public class JugadorController {
             jugador.setPosicion(jugadorActualizado.getPosicion());
             jugador.setNacionalidad(jugadorActualizado.getNacionalidad());
 
-            // Actualizamos el equipo también con el objeto completo desde BD usando getIdEquipo()
+            // Actualizamos el equipo también con el objeto completo desde BD usando
+            // getIdEquipo()
             if (jugadorActualizado.getEquipo() != null && jugadorActualizado.getEquipo().getIdEquipo() != null) {
                 Equipo equipo = equipoService.buscarPorId(jugadorActualizado.getEquipo().getIdEquipo()).orElse(null);
                 jugador.setEquipo(equipo);
@@ -108,5 +110,10 @@ public class JugadorController {
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         jugadorService.eliminar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/equipo/{idEquipo}")
+    public List<Jugador> obtenerJugadoresPorEquipo(@PathVariable Integer idEquipo) {
+        return jugadorService.obtenerPorEquipo(idEquipo);
     }
 }
