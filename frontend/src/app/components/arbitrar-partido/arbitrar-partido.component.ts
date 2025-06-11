@@ -17,7 +17,7 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
   tipoEventosNormales: TipoEvento[] = [];
 
   partido: Partido | null = null;
-  parteActual = 0;
+  parteActual = 0; // 0 = antes de empezar, 1=primera parte, 2=segunda parte
   tiempoEnSegundos = 0;
   velocidad = 1;
   intervaloId: any;
@@ -31,12 +31,18 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
   onceVisitantePuesto = false;
 
   partidoIniciado = false;
-  tiempoAnadido = 0;
+  tiempoAnadidoPrimeraParte = 0;
+  tiempoAnadidoSegundaParte = 0;
+
   tiempoMaximoEnSegundos = 45 * 60; // 45 minutos
   botonTiempoAnadidoHabilitado = false;
 
   mostrarModalTiempoAnadido = false;
   tiempoAnadirInput = 0;
+
+  tiempoTerminado = false;          // Indica si se agotó el tiempo en la parte actual
+  duracionPrimeraParte = 0;         // Guarda duración primera parte
+  tituloParte = '';
 
   constructor(private eventosService: EventosService, private route: ActivatedRoute) { }
 
@@ -54,7 +60,7 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
       next: (tipos) => {
         this.tipoEventos = tipos;
 
-        const ordenEspeciales = [1, 27, 2, 5, 7, 6];
+        const ordenEspeciales = [1, 27, 2, 5, 7, 6]; // IDs especiales
 
         this.tipoEventosEspeciales = ordenEspeciales
           .map(id => tipos.find(t => t.id_tipo_evento === id))
@@ -75,6 +81,10 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     } else if (nombreTipo === 'inicioPartido') {
       this.iniciarPartido();
     } else if (nombreTipo === 'tExtra1') {
+      this.abrirModalTiempoAnadido();
+    } else if (nombreTipo === 'inicioSegunda') {
+      this.iniciarSegundaParte();
+    } else if (nombreTipo === 'tExtra2') {
       this.abrirModalTiempoAnadido();
     } else {
       console.log('Evento seleccionado:', nombreTipo);
@@ -155,14 +165,36 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     if (this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado) {
       this.partidoIniciado = true;
       this.parteActual = 1;
+      this.tiempoTerminado = false;
+      this.tiempoEnSegundos = 0;
+      this.tituloParte = 'Primera parte';
+      this.botonTiempoAnadidoHabilitado = false;
+      this.iniciarCronometro();
+    }
+  }
+
+  iniciarSegundaParte() {
+    if (this.parteActual === 1 && this.tiempoTerminado) {
+      this.parteActual = 2;
+      this.tiempoTerminado = false;
+      this.tiempoEnSegundos = 0;
+      this.tituloParte = 'Segunda parte';
+      this.botonTiempoAnadidoHabilitado = false;
       this.iniciarCronometro();
     }
   }
 
   iniciarCronometro() {
     this.pararCronometro();
+
     this.intervaloId = setInterval(() => {
-      const maxTiempo = this.tiempoMaximoEnSegundos + this.tiempoAnadido * 60;
+      let maxTiempo = this.tiempoMaximoEnSegundos;
+
+      if (this.parteActual === 1) {
+        maxTiempo += this.tiempoAnadidoPrimeraParte * 60;
+      } else if (this.parteActual === 2) {
+        maxTiempo += this.tiempoAnadidoSegundaParte * 60;
+      }
 
       if (this.tiempoEnSegundos < maxTiempo) {
         this.tiempoEnSegundos++;
@@ -172,10 +204,15 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
         }
       } else {
         this.pararCronometro();
-        this.registrarFinPrimeraParte(); // << NUEVO
+        if (this.parteActual === 1) {
+          this.registrarFinPrimeraParte();
+        } else if (this.parteActual === 2) {
+          this.registrarFinPartido();
+        }
       }
     }, 1000 / this.velocidad);
   }
+
 
   pararCronometro() {
     if (this.intervaloId) {
@@ -201,12 +238,18 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
 
   confirmarTiempoAnadido() {
     if (this.tiempoAnadirInput >= 0 && this.tiempoAnadirInput <= 8) {
-      this.tiempoAnadido = this.tiempoAnadirInput;
+      if (this.parteActual === 1) {
+        this.tiempoAnadidoPrimeraParte = this.tiempoAnadirInput;
+      } else if (this.parteActual === 2) {
+        this.tiempoAnadidoSegundaParte = this.tiempoAnadirInput;
+      }
+
       this.mostrarModalTiempoAnadido = false;
     } else {
       alert('Introduce un valor entre 0 y 8 minutos.');
     }
   }
+
 
   registrarFinPrimeraParte() {
     if (!this.partido) return;
@@ -214,10 +257,10 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     const tipoFinPrimeraParte = this.tipoEventos.find(t => t.id_tipo_evento === 4);
     if (!tipoFinPrimeraParte) return;
 
-    const horas = 0;  // Asumiendo que nunca pasa de 1 hora aquí, si puede, adapta
-    const minutos = Math.floor(this.tiempoEnSegundos / 60);
-    const segundos = this.tiempoEnSegundos % 60;
-    const tiempoFormateado = `${this.pad(horas)}:${this.pad(minutos)}:${this.pad(segundos)}`;
+    this.tiempoTerminado = true;
+    this.duracionPrimeraParte = this.tiempoEnSegundos; // Guardamos duración real
+
+    const tiempoFormateado = this.formatearTiempo(this.tiempoEnSegundos);
 
     const eventoFinPrimeraParte: Evento = {
       id_tipo_evento: 4,
@@ -226,15 +269,36 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
       id_jugador: null
     };
 
-    console.log('Enviando evento:', eventoFinPrimeraParte);
-
     this.eventosService.registrarEvento(eventoFinPrimeraParte).subscribe({
-      next: res => console.log('Evento guardado', res),
-      error: err => console.error('Error al guardar evento', err)
+      next: res => console.log('Evento fin primera parte guardado', res),
+      error: err => console.error('Error al guardar evento fin primera parte', err)
     });
   }
 
+  registrarFinPartido() {
+    if (!this.partido) return;
 
+    const tipoFinPartido = this.tipoEventos.find(t => t.id_tipo_evento === 3);
+    if (!tipoFinPartido) return;
+
+    this.tiempoTerminado = true;
+
+    // Sumamos duración primera parte + segunda parte actual
+    const duracionTotal = this.duracionPrimeraParte + this.tiempoEnSegundos;
+    const tiempoFormateado = this.formatearTiempo(duracionTotal);
+
+    const eventoFinPartido: Evento = {
+      id_tipo_evento: 3,
+      id_partido: this.partido.id_partido,
+      tiempo_partido: tiempoFormateado,
+      id_jugador: null
+    };
+
+    this.eventosService.registrarEvento(eventoFinPartido).subscribe({
+      next: res => console.log('Evento fin partido guardado', res),
+      error: err => console.error('Error al guardar evento fin partido', err)
+    });
+  }
 
   cancelarTiempoAnadido() {
     this.mostrarModalTiempoAnadido = false;
@@ -243,25 +307,42 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
   botonHabilitado(tipo: TipoEvento): boolean {
     const id = tipo.id_tipo_evento;
 
-    if (id === 1 || id === 27) {
-      // Solo botones once inicial habilitados al principio y si no puestos aún
-      return !this.partidoIniciado && ((id === 1 && !this.onceLocalPuesto) || (id === 27 && !this.onceVisitantePuesto));
+    // Bloqueos y desbloqueos según el estado del partido y la parte
+
+    if (id === 1) { // onceInicLocal
+      return !this.onceLocalPuesto && !this.partidoIniciado;
     }
-    if (id === 2) {
-      // Botón inicio partido habilitado solo si los dos onces puestos y partido NO iniciado
+
+    if (id === 27) { // onceInicVisitante
+      return !this.onceVisitantePuesto && !this.partidoIniciado;
+    }
+
+    if (id === 2) { // inicioPartido
       return this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado;
     }
-    if (id === 5) {
-      // Botón tiempo añadido solo si partido iniciado y llegamos a minuto 40
-      return this.partidoIniciado && this.botonTiempoAnadidoHabilitado;
+
+    if (id === 5) { // tExtra1 (tiempo añadido primera parte)
+      return this.partidoIniciado && !this.tiempoTerminado && this.botonTiempoAnadidoHabilitado && this.parteActual === 1;
     }
-    // Otros botones habilitados solo si partido iniciado
-    return this.partidoIniciado;
+
+    if (id === 7) { // inicioSegunda
+      return this.parteActual === 1 && this.tiempoTerminado;
+    }
+
+    if (id === 6) { // tExtra2 (tiempo añadido segunda parte)
+      return this.parteActual === 2 && !this.tiempoTerminado && this.botonTiempoAnadidoHabilitado && this.parteActual === 2;
+    }
+
+    if (id === 3) { // finPartido
+      return this.parteActual === 2 && this.tiempoTerminado;
+    }
+
+    if (!this.partidoIniciado) return false;
+    if (this.tiempoTerminado) return false;
+
+    return true;
   }
 
-  ngOnDestroy() {
-    this.pararCronometro();
-  }
 
   get tiempoFormateado(): string {
     const minutos = Math.floor(this.tiempoEnSegundos / 60);
@@ -273,7 +354,18 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     return num < 10 ? '0' + num : num.toString();
   }
 
+  formatearTiempo(segundosTotales: number): string {
+    const horas = Math.floor(segundosTotales / 3600);
+    const minutos = Math.floor((segundosTotales % 3600) / 60);
+    const segundos = segundosTotales % 60;
+    return `${this.pad(horas)}:${this.pad(minutos)}:${this.pad(segundos)}`;
+  }
+
   ocultarModalOnceInicial() {
     this.mostrarModalOnceInicial = false;
+  }
+
+  ngOnDestroy() {
+    this.pararCronometro();
   }
 }
