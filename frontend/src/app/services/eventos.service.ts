@@ -9,7 +9,7 @@ export interface Equipo {
   ciudad: string;
   escudo: string;
   fotoOficial: string;
-  jugadores: Jugador[]; 
+  jugadores: Jugador[];
 }
 
 export interface Arbitro {
@@ -44,7 +44,7 @@ export interface Jugador {
 export interface Evento {
   tiempo_partido: string; // Formato HH:mm:ss
   id_tipo_evento: number;
-  id_jugador: number;
+  id_jugador: number | null;
   id_partido: number;
 }
 
@@ -54,7 +54,7 @@ export interface Evento {
 export class EventosService {
   private baseUrl = 'http://localhost:8080/api';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getMisPartidos(): Observable<Partido[]> {
     return this.http.get<Partido[]>(`${this.baseUrl}/eventos/mis-partidos`);
@@ -79,4 +79,10 @@ export class EventosService {
   getEventosPorPartido(idPartido: number): Observable<Evento[]> {
     return this.http.get<Evento[]>(`${this.baseUrl}/eventos/partido/${idPartido}`);
   }
+
+  registrarEvento(evento: Evento): Observable<Evento> {
+    console.log('Registrando evento:', evento);
+    return this.http.post<Evento>(`${this.baseUrl}/eventos/uno`, evento);
+  }
+
 }

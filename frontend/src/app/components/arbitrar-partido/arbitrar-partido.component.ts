@@ -2,13 +2,14 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Evento, EventosService, Partido, TipoEvento } from '../../services/eventos.service';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-arbitrar-partido',
   templateUrl: './arbitrar-partido.component.html',
   styleUrls: ['./arbitrar-partido.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, FormsModule]
 })
 export class ArbitrarComponent implements OnInit, OnDestroy {
   tipoEventos: TipoEvento[] = [];
@@ -26,7 +27,18 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
   jugadoresSeleccionadosIds: Set<number> = new Set();
   esLocalOnceInicial = true;
 
-  constructor(private eventosService: EventosService, private route: ActivatedRoute) {}
+  onceLocalPuesto = false;
+  onceVisitantePuesto = false;
+
+  partidoIniciado = false;
+  tiempoAnadido = 0;
+  tiempoMaximoEnSegundos = 45 * 60; // 45 minutos
+  botonTiempoAnadidoHabilitado = false;
+
+  mostrarModalTiempoAnadido = false;
+  tiempoAnadirInput = 0;
+
+  constructor(private eventosService: EventosService, private route: ActivatedRoute) { }
 
   ngOnInit() {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -34,8 +46,6 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     this.eventosService.getPartidoById(id).subscribe({
       next: (p) => {
         this.partido = p;
-        console.log('partido.local:', this.partido.local);
-        console.log('partido.visitante:', this.partido.visitante);
       },
       error: (err) => console.error('Error cargando partido:', err)
     });
@@ -57,59 +67,15 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     });
   }
 
-  iniciarPartido() {
-    if (this.parteActual === 0) {
-      this.parteActual = 1;
-      this.iniciarCronometro();
-    }
-  }
-
-  detenerPartido() {
-    this.parteActual = 0;
-    this.pararCronometro();
-    this.tiempoEnSegundos = 0;
-  }
-
-  cambiarVelocidad(nuevaVelocidad: number) {
-    this.velocidad = nuevaVelocidad;
-    if (this.intervaloId) {
-      this.pararCronometro();
-      this.iniciarCronometro();
-    }
-  }
-
-  iniciarCronometro() {
-    this.intervaloId = setInterval(() => {
-      this.tiempoEnSegundos++;
-    }, 1000 / this.velocidad);
-  }
-
-  pararCronometro() {
-    if (this.intervaloId) {
-      clearInterval(this.intervaloId);
-      this.intervaloId = null;
-    }
-  }
-
-  ngOnDestroy() {
-    this.pararCronometro();
-  }
-
-  get tiempoFormateado(): string {
-    const minutos = Math.floor(this.tiempoEnSegundos / 60);
-    const segundos = this.tiempoEnSegundos % 60;
-    return `${this.pad(minutos)}:${this.pad(segundos)}`;
-  }
-
-  pad(num: number): string {
-    return num < 10 ? '0' + num : num.toString();
-  }
-
   onTipoEventoClick(nombreTipo: string) {
     if (nombreTipo === 'onceInicLocal') {
       this.abrirModalOnceInicial(true);
     } else if (nombreTipo === 'onceInicVisitante') {
       this.abrirModalOnceInicial(false);
+    } else if (nombreTipo === 'inicioPartido') {
+      this.iniciarPartido();
+    } else if (nombreTipo === 'tExtra1') {
+      this.abrirModalTiempoAnadido();
     } else {
       console.log('Evento seleccionado:', nombreTipo);
     }
@@ -125,7 +91,6 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
 
     this.eventosService.getJugadoresByEquipo(idEquipo).subscribe({
       next: (jugadores) => {
-        console.log('Jugadores cargados:', jugadores);
         this.jugadoresOnceInicial = [...jugadores];
         this.mostrarModalOnceInicial = true;
       },
@@ -170,18 +135,142 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
       id_partido: this.partido!.id_partido
     }));
 
-    console.log('Eventos a registrar:', eventos);
-
     this.eventosService.registrarEventos(eventos).subscribe({
       next: () => {
-        console.log('Once inicial registrado correctamente.');
         this.mostrarModalOnceInicial = false;
+
+        if (this.esLocalOnceInicial) {
+          this.onceLocalPuesto = true;
+        } else {
+          this.onceVisitantePuesto = true;
+        }
       },
       error: err => {
-        console.error('Error registrando once inicial:', err);
         alert('Error registrando once inicial');
       }
     });
+  }
+
+  iniciarPartido() {
+    if (this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado) {
+      this.partidoIniciado = true;
+      this.parteActual = 1;
+      this.iniciarCronometro();
+    }
+  }
+
+  iniciarCronometro() {
+    this.pararCronometro();
+    this.intervaloId = setInterval(() => {
+      const maxTiempo = this.tiempoMaximoEnSegundos + this.tiempoAnadido * 60;
+
+      if (this.tiempoEnSegundos < maxTiempo) {
+        this.tiempoEnSegundos++;
+
+        if (this.tiempoEnSegundos === 40 * 60) {
+          this.botonTiempoAnadidoHabilitado = true;
+        }
+      } else {
+        this.pararCronometro();
+        this.registrarFinPrimeraParte(); // << NUEVO
+      }
+    }, 1000 / this.velocidad);
+  }
+
+  pararCronometro() {
+    if (this.intervaloId) {
+      clearInterval(this.intervaloId);
+      this.intervaloId = null;
+    }
+  }
+
+  cambiarVelocidad(nuevaVelocidad: number) {
+    this.velocidad = nuevaVelocidad;
+    if (this.intervaloId) {
+      this.pararCronometro();
+      this.iniciarCronometro();
+    }
+  }
+
+  abrirModalTiempoAnadido() {
+    if (this.botonTiempoAnadidoHabilitado) {
+      this.tiempoAnadirInput = 0;
+      this.mostrarModalTiempoAnadido = true;
+    }
+  }
+
+  confirmarTiempoAnadido() {
+    if (this.tiempoAnadirInput >= 0 && this.tiempoAnadirInput <= 8) {
+      this.tiempoAnadido = this.tiempoAnadirInput;
+      this.mostrarModalTiempoAnadido = false;
+    } else {
+      alert('Introduce un valor entre 0 y 8 minutos.');
+    }
+  }
+
+  registrarFinPrimeraParte() {
+    if (!this.partido) return;
+
+    const tipoFinPrimeraParte = this.tipoEventos.find(t => t.id_tipo_evento === 4);
+    if (!tipoFinPrimeraParte) return;
+
+    const horas = 0;  // Asumiendo que nunca pasa de 1 hora aquí, si puede, adapta
+    const minutos = Math.floor(this.tiempoEnSegundos / 60);
+    const segundos = this.tiempoEnSegundos % 60;
+    const tiempoFormateado = `${this.pad(horas)}:${this.pad(minutos)}:${this.pad(segundos)}`;
+
+    const eventoFinPrimeraParte: Evento = {
+      id_tipo_evento: 4,
+      id_partido: this.partido.id_partido,
+      tiempo_partido: tiempoFormateado,
+      id_jugador: null
+    };
+
+    console.log('Enviando evento:', eventoFinPrimeraParte);
+
+    this.eventosService.registrarEvento(eventoFinPrimeraParte).subscribe({
+      next: res => console.log('Evento guardado', res),
+      error: err => console.error('Error al guardar evento', err)
+    });
+  }
+
+
+
+  cancelarTiempoAnadido() {
+    this.mostrarModalTiempoAnadido = false;
+  }
+
+  botonHabilitado(tipo: TipoEvento): boolean {
+    const id = tipo.id_tipo_evento;
+
+    if (id === 1 || id === 27) {
+      // Solo botones once inicial habilitados al principio y si no puestos aún
+      return !this.partidoIniciado && ((id === 1 && !this.onceLocalPuesto) || (id === 27 && !this.onceVisitantePuesto));
+    }
+    if (id === 2) {
+      // Botón inicio partido habilitado solo si los dos onces puestos y partido NO iniciado
+      return this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado;
+    }
+    if (id === 5) {
+      // Botón tiempo añadido solo si partido iniciado y llegamos a minuto 40
+      return this.partidoIniciado && this.botonTiempoAnadidoHabilitado;
+    }
+    // Otros botones habilitados solo si partido iniciado
+    return this.partidoIniciado;
+  }
+
+  ngOnDestroy() {
+    this.pararCronometro();
+  }
+
+  get tiempoFormateado(): string {
+    const minutos = Math.floor(this.tiempoEnSegundos / 60);
+    const segundos = this.tiempoEnSegundos % 60;
+    return `${this.pad(minutos)}:${this.pad(segundos)}`;
+  }
+
+  pad(num: number): string {
+    return num < 10 ? '0' + num : num.toString();
   }
 
   ocultarModalOnceInicial() {

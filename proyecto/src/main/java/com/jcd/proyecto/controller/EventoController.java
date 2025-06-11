@@ -79,4 +79,37 @@ public class EventoController {
 
         return usuario.getArbitro().getIdArbitro().longValue(); // convertimos Integer a Long
     }
+
+    @PostMapping("/uno")
+    public ResponseEntity<Evento> registrarEvento(@RequestBody EventoDTO dto) {
+        System.out.println("Llega POST /api/eventos/uno con DTO:");
+        System.out.println("  id_tipo_evento: " + dto.getId_tipo_evento());
+        System.out.println("  id_partido: " + dto.getId_partido());
+        System.out.println("  tiempo_partido: " + dto.getTiempo_partido());
+        System.out.println("  id_jugador: " + dto.getId_jugador());
+
+        Evento evento = new Evento();
+        evento.setTiempo_partido(LocalTime.parse(dto.getTiempo_partido()));
+
+        TipoEvento tipoEvento = new TipoEvento();
+        tipoEvento.setId_tipo_evento(dto.getId_tipo_evento());
+        evento.setTipoEvento(tipoEvento);
+
+        if (dto.getId_jugador() != null) {
+            Jugador jugador = new Jugador();
+            jugador.setId_jugador(dto.getId_jugador());
+            evento.setJugador(jugador);
+        } else {
+            evento.setJugador(null);
+        }
+
+        Partido partido = new Partido();
+        partido.setId_partido(dto.getId_partido());
+        evento.setPartido(partido);
+
+        Evento guardado = eventoService.guardar(evento);
+        System.out.println("Evento guardado con ID: " + guardado.getId_evento()); // o el getter que tengas
+        return ResponseEntity.ok(guardado);
+    }
+
 }
