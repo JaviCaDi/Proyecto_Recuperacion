@@ -1,6 +1,7 @@
 package com.jcd.proyecto.repository;
 
 import com.jcd.proyecto.dto.EstadisticaDTO;
+import com.jcd.proyecto.dto.EstadisticaEquipoDTO;
 import com.jcd.proyecto.model.Evento;
 
 import java.util.List;
@@ -23,5 +24,16 @@ public interface EventoRepository extends JpaRepository<Evento, Integer> {
     List<EstadisticaDTO> findTopByTipoEvento(@Param("tipoEventoId") Long tipoEventoId);
 
     List<Evento> findByPartido_IdPartido(Integer idPartido);
+
+    @Query("""
+            SELECT new com.jcd.proyecto.dto.EstadisticaEquipoDTO(e.nombre, COUNT(ev))
+            FROM Evento ev
+            JOIN ev.jugador j
+            JOIN j.equipo e
+            WHERE ev.tipoEvento.id = :tipoEventoId
+            GROUP BY e.id, e.nombre
+            ORDER BY COUNT(ev) DESC
+            """)
+    List<EstadisticaEquipoDTO> findTopEquiposByTipoEvento(@Param("tipoEventoId") Long tipoEventoId);
 
 }

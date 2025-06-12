@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.jcd.proyecto.service.EventoService;
 import com.jcd.proyecto.dto.EstadisticaDTO;
+import com.jcd.proyecto.dto.EstadisticaEquipoDTO;
 
 @RestController
 @RequestMapping("/api")
@@ -28,5 +29,10 @@ public class EstadisticasController {
         return ResponseEntity.ok(resultado);
     }
 
-    
+    @GetMapping("/estadisticas/equipos/{tipo}")
+    public ResponseEntity<List<EstadisticaEquipoDTO>> getTopEquiposEstadistica(@PathVariable String tipo) {
+        List<EstadisticaEquipoDTO> resultado = eventoService.obtenerTopEquiposPorTipo(tipo);
+        return ResponseEntity.ok(resultado);
+    }
+
 }

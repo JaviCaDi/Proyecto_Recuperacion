@@ -1,6 +1,7 @@
 package com.jcd.proyecto.service;
 
 import com.jcd.proyecto.dto.EstadisticaDTO;
+import com.jcd.proyecto.dto.EstadisticaEquipoDTO;
 import com.jcd.proyecto.model.Evento;
 import com.jcd.proyecto.repository.EventoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,6 +71,33 @@ public class EventoServiceImpl implements EventoService {
         }
 
         return eventoRepository.findTopByTipoEvento(idTipoEvento);
+    }
+
+    @Override
+    public List<EstadisticaEquipoDTO> obtenerTopEquiposPorTipo(String tipo) {
+        Long idTipoEvento;
+
+        switch (tipo) {
+            case "goles":
+                idTipoEvento = 17L;
+                break;
+            case "asistencias":
+                idTipoEvento = 18L;
+                break;
+            case "golesPropia":
+                idTipoEvento = 19L;
+                break;
+            case "tarjetaAma":
+                idTipoEvento = 8L;
+                break;
+            case "tarjetaRoja":
+                idTipoEvento = 9L;
+                break;
+            default:
+                throw new IllegalArgumentException("Tipo de estadística no válido: " + tipo);
+        }
+
+        return eventoRepository.findTopEquiposByTipoEvento(idTipoEvento);
     }
 
 }

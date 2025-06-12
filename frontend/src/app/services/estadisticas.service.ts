@@ -12,4 +12,9 @@ export class EstadisticasService {
     return this.http.get<any[]>(`${this.baseUrl}/estadisticas/${tipo}`);
   }
 
+  getTopEquipos(tipo: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/estadisticas/equipos/${tipo}`);
+}
+
+
 }

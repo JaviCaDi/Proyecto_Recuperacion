@@ -1,6 +1,7 @@
 package com.jcd.proyecto.service;
 
 import com.jcd.proyecto.dto.EstadisticaDTO;
+import com.jcd.proyecto.dto.EstadisticaEquipoDTO;
 import com.jcd.proyecto.model.Evento;
 
 import java.util.List;
@@ -21,4 +22,5 @@ public interface EventoService {
 
     List<EstadisticaDTO> obtenerTopPorTipo(String tipo);
 
+    List<EstadisticaEquipoDTO> obtenerTopEquiposPorTipo(String tipo);
 }
