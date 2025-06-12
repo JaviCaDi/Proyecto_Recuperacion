@@ -103,3 +103,37 @@
     </div>
   </div>
 </div>
+
+<div class="modal-custom" *ngIf="mostrarModalEventoNormal && partido">
+  <div class="modal-content-custom">
+    <div class="modal-header-custom">
+      <h5 class="modal-title">Registrar {{ eventoNormalSeleccionado?.nombre }}</h5>
+      <button class="btn-cerrar" (click)="cancelarEventoNormal()">×</button>
+    </div>
+    <div class="modal-body-custom">
+      <p>Selecciona un equipo:</p>
+      <select [(ngModel)]="equipoSeleccionadoId" (change)="onEquipoSeleccionado()" class="form-select">
+        <option [ngValue]="null" disabled>-- Selecciona un equipo --</option>
+        <option [ngValue]="partido.local.idEquipo">{{ partido.local.nombre }}</option>
+        <option [ngValue]="partido.visitante.idEquipo">{{ partido.visitante.nombre }}</option>
+
+      </select>
+
+      <div *ngIf="jugadoresEquipoSeleccionado.length > 0" style="margin-top: 1rem;">
+        <p>Selecciona un jugador:</p>
+        <select [(ngModel)]="jugadorSeleccionadoId" class="form-select">
+          <option [ngValue]="null" disabled>-- Selecciona un jugador --</option>
+          <option *ngFor="let jugador of jugadoresEquipoSeleccionado" [ngValue]="jugador.id_jugador">
+            {{ jugador.nombre }}
+          </option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer-custom">
+      <button class="btn btn-secondary" (click)="cancelarEventoNormal()">Cancelar</button>
+      <button class="btn btn-primary" (click)="confirmarEventoNormal()" [disabled]="!jugadorSeleccionadoId">
+        Confirmar
+      </button>
+    </div>
+  </div>
+</div>

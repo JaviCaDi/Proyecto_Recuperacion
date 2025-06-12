@@ -44,6 +44,14 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
   duracionPrimeraParte = 0;         // Guarda duración primera parte
   tituloParte = '';
 
+  eventoNormalSeleccionado: TipoEvento | null = null;
+  jugadorSeleccionadoId: number | null = null;
+  mostrarModalEventoNormal: boolean = false;
+
+  equipoSeleccionadoId: number | null = null;
+  jugadoresEquipoSeleccionado: any[] = [];
+
+
   constructor(private eventosService: EventosService, private route: ActivatedRoute) { }
 
   ngOnInit() {
@@ -87,8 +95,14 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
     } else if (nombreTipo === 'tExtra2') {
       this.abrirModalTiempoAnadido();
     } else {
-      console.log('Evento seleccionado:', nombreTipo);
+      const tipoEvento = this.tipoEventosNormales.find(t => t.nombre === nombreTipo);
+      if (tipoEvento) {
+        this.abrirModalEventoNormal(tipoEvento);
+      } else {
+        console.warn('Tipo de evento no encontrado:', nombreTipo);
+      }
     }
+
   }
 
   abrirModalOnceInicial(esLocal: boolean) {
@@ -160,6 +174,69 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  abrirModalEventoNormal(evento: TipoEvento) {
+    if (!this.partido) return;
+
+    this.eventoNormalSeleccionado = evento;
+    this.jugadorSeleccionadoId = null;
+    this.equipoSeleccionadoId = null;
+    this.jugadoresEquipoSeleccionado = [];
+    this.mostrarModalEventoNormal = true;
+  }
+
+  onEquipoSeleccionado(): void {
+    if (!this.equipoSeleccionadoId) {
+      this.jugadoresEquipoSeleccionado = [];
+      return;
+    }
+
+    this.eventosService.getJugadoresByEquipo(this.equipoSeleccionadoId).subscribe({
+      next: jugadores => {
+        this.jugadoresEquipoSeleccionado = jugadores;
+        this.jugadorSeleccionadoId = null;
+      },
+      error: err => {
+        console.error('Error al cargar jugadores del equipo:', err);
+        alert('No se pudieron cargar los jugadores del equipo seleccionado.');
+      }
+    });
+  }
+
+
+
+  confirmarEventoNormal() {
+    if (!this.partido || !this.eventoNormalSeleccionado || !this.jugadorSeleccionadoId) {
+      alert('Debes seleccionar un jugador.');
+      return;
+    }
+
+    const evento: Evento = {
+      id_tipo_evento: this.eventoNormalSeleccionado.id_tipo_evento,
+      id_partido: this.partido.id_partido,
+      id_jugador: this.jugadorSeleccionadoId,
+      tiempo_partido: this.formatearTiempo(this.tiempoEnSegundos)
+    };
+
+    this.eventosService.registrarEvento(evento).subscribe({
+      next: () => {
+        this.mostrarModalEventoNormal = false;
+        this.eventoNormalSeleccionado = null;
+        this.jugadorSeleccionadoId = null;
+      },
+      error: err => {
+        console.error('Error al registrar evento normal:', err);
+        alert('Error al registrar evento.');
+      }
+    });
+  }
+
+  cancelarEventoNormal() {
+    this.mostrarModalEventoNormal = false;
+    this.eventoNormalSeleccionado = null;
+    this.jugadorSeleccionadoId = null;
+  }
+
 
   iniciarPartido() {
     if (this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado) {
@@ -307,41 +384,26 @@ export class ArbitrarComponent implements OnInit, OnDestroy {
   botonHabilitado(tipo: TipoEvento): boolean {
     const id = tipo.id_tipo_evento;
 
-    // Bloqueos y desbloqueos según el estado del partido y la parte
+    // Especiales
+    if (id === 1) return !this.onceLocalPuesto && !this.partidoIniciado; // onceInicLocal
+    if (id === 27) return !this.onceVisitantePuesto && !this.partidoIniciado; // onceInicVisitante
+    if (id === 2) return this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado; // inicioPartido
+    if (id === 5) return this.partidoIniciado && !this.tiempoTerminado && this.botonTiempoAnadidoHabilitado && this.parteActual === 1; // tExtra1
+    if (id === 7) return this.parteActual === 1 && this.tiempoTerminado; // inicioSegunda
+    if (id === 6) return this.parteActual === 2 && !this.tiempoTerminado && this.botonTiempoAnadidoHabilitado; // tExtra2
+    if (id === 3) return this.parteActual === 2 && this.tiempoTerminado; // finPartido
 
-    if (id === 1) { // onceInicLocal
-      return !this.onceLocalPuesto && !this.partidoIniciado;
+    // Normales (los no especiales)
+    const idsEspeciales = [1, 2, 3, 5, 6, 7, 27];
+    const esEventoNormal = !idsEspeciales.includes(id);
+
+    if (esEventoNormal) {
+      return this.partidoIniciado && !this.tiempoTerminado;
     }
 
-    if (id === 27) { // onceInicVisitante
-      return !this.onceVisitantePuesto && !this.partidoIniciado;
-    }
-
-    if (id === 2) { // inicioPartido
-      return this.onceLocalPuesto && this.onceVisitantePuesto && !this.partidoIniciado;
-    }
-
-    if (id === 5) { // tExtra1 (tiempo añadido primera parte)
-      return this.partidoIniciado && !this.tiempoTerminado && this.botonTiempoAnadidoHabilitado && this.parteActual === 1;
-    }
-
-    if (id === 7) { // inicioSegunda
-      return this.parteActual === 1 && this.tiempoTerminado;
-    }
-
-    if (id === 6) { // tExtra2 (tiempo añadido segunda parte)
-      return this.parteActual === 2 && !this.tiempoTerminado && this.botonTiempoAnadidoHabilitado && this.parteActual === 2;
-    }
-
-    if (id === 3) { // finPartido
-      return this.parteActual === 2 && this.tiempoTerminado;
-    }
-
-    if (!this.partidoIniciado) return false;
-    if (this.tiempoTerminado) return false;
-
-    return true;
+    return false;
   }
+
 
 
   get tiempoFormateado(): string {

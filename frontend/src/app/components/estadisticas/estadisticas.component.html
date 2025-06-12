@@ -1,0 +1,32 @@
+<div class="estadisticas-container">
+  <h2>Estadísticas de Jugadores</h2>
+
+  <label for="categoria">Selecciona categoría:</label>
+  <select [(ngModel)]="categoriaSeleccionada" (change)="cargarEstadisticas()" class="form-select">
+    <option *ngFor="let cat of categorias" [value]="cat">{{ cat | titlecase }}</option>
+  </select>
+
+  <div *ngIf="topJugadores.length > 0" class="tabla-estadisticas">
+    <table>
+      <thead>
+        <tr>
+          <th>Posición</th>
+          <th>Jugador</th>
+          <th>Equipo</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let jugador of topJugadores; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ jugador.nombreJugador }}</td>
+          <td>{{ jugador.nombreEquipo }}</td>
+          <td>{{ jugador.cantidad }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="topJugadores.length === 0">
+    <p>No hay datos disponibles.</p>
+  </div>

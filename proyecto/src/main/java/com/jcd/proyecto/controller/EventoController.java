@@ -111,5 +111,5 @@ public class EventoController {
         System.out.println("Evento guardado con ID: " + guardado.getId_evento()); // o el getter que tengas
         return ResponseEntity.ok(guardado);
     }
-
+   
 }

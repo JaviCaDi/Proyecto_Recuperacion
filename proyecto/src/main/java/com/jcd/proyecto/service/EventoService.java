@@ -1,5 +1,6 @@
 package com.jcd.proyecto.service;
 
+import com.jcd.proyecto.dto.EstadisticaDTO;
 import com.jcd.proyecto.model.Evento;
 
 import java.util.List;
@@ -17,4 +18,7 @@ public interface EventoService {
     List<Evento> guardarTodos(List<Evento> eventos);
 
     List<Evento> obtenerPorPartido(Integer idPartido);
+
+    List<EstadisticaDTO> obtenerTopPorTipo(String tipo);
+
 }

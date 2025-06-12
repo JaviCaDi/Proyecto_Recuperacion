@@ -1,0 +1,23 @@
+.estadisticas-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: auto;
+}
+
+.form-select {
+  margin-bottom: 20px;
+  padding: 6px;
+  width: 100%;
+}
+
+.tabla-estadisticas table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-estadisticas th,
+.tabla-estadisticas td {
+  padding: 8px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
